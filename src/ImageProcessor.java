@@ -51,7 +51,10 @@ public class ImageProcessor {
         return kernel;
     }
 
-    public static void applyKernel(double[][] kernel, BufferedImage img) {
+    public static BufferedImage applyKernel(double[][] kernel,
+            BufferedImage img) {
+        BufferedImage out = new BufferedImage(img.getWidth(), img.getHeight(),
+                BufferedImage.TYPE_3BYTE_BGR);
         for (int i = kernel.length; i < img.getWidth() - kernel.length; i++) {
             for (int j = kernel.length; j < img.getHeight()
                     - kernel.length; j++) {
@@ -74,8 +77,9 @@ public class ImageProcessor {
                 rgb = (rgb << 8) + (int) r;
                 rgb = (rgb << 8) + (int) g;
                 rgb = (rgb << 8) + (int) b;
-                img.setRGB(i, j, rgb);
+                out.setRGB(i, j, rgb);
             }
         }
+        return out;
     }
 }

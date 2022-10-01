@@ -7,7 +7,7 @@ public class Main {
         BufferedImage img;
         double[][] kernel = ImageProcessor.createKernel(5);
         img = ImageProcessor.readImage("wall.png");
-        ImageProcessor.applyKernel(kernel, img);
+        img = ImageProcessor.applyKernel(kernel, img);
         ImageProcessor.saveImage(img, "test");
     }
 
