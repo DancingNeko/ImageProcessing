@@ -27,7 +27,7 @@ public class ImageProcessor {
         }
     }
 
-    public static double[][] createKernel(int k) {
+    public static double[][] createKernel(int k, double blur) {
         int width = k;
         int height = k;
         double sum = 0;
@@ -35,9 +35,9 @@ public class ImageProcessor {
         for (int i = 0; i < width; i++) {
             for (int j = 0; j < height; j++) {
                 double grey = Math.pow(Math.E,
-                        (-1.0 / k * Math.pow(i - width / 2, 2) / 2))
-                        * (Math.pow(Math.E,
-                                (-1.0 / k * Math.pow(j - height / 2, 2) / 2))
+                        (-1.0 / (k * blur) * Math.pow(i - width / 2, 2) / 2))
+                        * (Math.pow(Math.E, (-1.0 / (k * blur)
+                                * Math.pow(j - height / 2, 2) / 2))
                                 / (2 * Math.PI));
                 sum += grey;
                 kernel[i][j] = grey;

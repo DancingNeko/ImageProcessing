@@ -5,10 +5,8 @@ public class Main {
 
     public static void main(String[] args) {
         BufferedImage img;
-        double[][] kernel = ImageProcessor.createKernel(5);
-        img = ImageProcessor.readImage("wall.png");
-        img = ImageProcessor.applyKernel(kernel, img);
-        ImageProcessor.saveImage(img, "test");
+        img = ImageProcessor.readImage("lignt.png");
+        Visualizer window = new Visualizer(img);
     }
 
 }
