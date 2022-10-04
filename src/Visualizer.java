@@ -9,25 +9,25 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 public class Visualizer extends JFrame {
+    DrawPanel p;
+
     public Visualizer(BufferedImage img) {
         super();
         this.setDefaultCloseOperation(EXIT_ON_CLOSE);
         this.setLayout(new BoxLayout(this.getContentPane(), BoxLayout.Y_AXIS));
         JSlider blur = new JSlider();
         this.add(blur);
-        DrawPanel p = new DrawPanel(
-                this.blurImage(img, blur.getValue() / 10.0));
-        this.add(p);
+        this.p = new DrawPanel(img);
+        this.add(this.p);
         this.setSize(img.getWidth(), img.getHeight() + 50);
         this.setVisible(true);
         blur.addChangeListener(new ChangeListener() {
             @Override
             public void stateChanged(ChangeEvent ce) {
-                p.setPic(
+                Visualizer.this.p.setPic(
                         Visualizer.this.blurImage(img, blur.getValue() / 10.0));
             }
         });
-
     }
 
     class DrawPanel extends JPanel {
@@ -55,5 +55,9 @@ public class Visualizer extends JFrame {
         double[][] kernel = ImageProcessor.createKernel((int) level, level);
         out = ImageProcessor.applyKernel(kernel, img);
         return out;
+    }
+
+    public void showImage(BufferedImage image) {
+        this.p.setPic(image);
     }
 }
