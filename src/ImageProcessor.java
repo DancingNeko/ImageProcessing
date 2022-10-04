@@ -148,27 +148,27 @@ public class ImageProcessor {
         int height = xMag[0].length;
         for (int x = 1; x < width - 1; x++) {
             for (int y = 1; y < height - 1; y++) {
-                if (Math.abs(angle[x][y] + 90) <= 22.5
-                        || Math.abs(angle[x][y] - 90) <= 22.5) {
+                if (Math.abs(angle[x][y] - 180) <= 22.5
+                        || Math.abs(angle[x][y]) <= 22.5) {
                     double tis = grey[x][y];
                     if ((grey[x][y - 1] > tis) || (grey[x][y + 1] > tis)) {
                         grey[x][y] = 0;
                     }
                 }
-                if (Math.abs(angle[x][y] + 45) <= 22.5) {
+                if (Math.abs(angle[x][y] - 45) <= 22.5) {
                     double tis = grey[x][y];
                     if ((grey[x - 1][y - 1] > tis)
                             || (grey[x + 1][y + 1] > tis)) {
                         grey[x][y] = 0;
                     }
                 }
-                if (Math.abs(angle[x][y]) <= 22.5) {
+                if (Math.abs(angle[x][y] + 90) <= 22.5) {
                     double tis = grey[x][y];
                     if ((grey[x - 1][y] > tis) || (grey[x + 1][y] > tis)) {
                         grey[x][y] = 0;
                     }
                 }
-                if (Math.abs(angle[x][y] - 45) <= 22.5) {
+                if (Math.abs(angle[x][y] - 135) <= 22.5) {
                     double tis = grey[x][y];
                     if ((grey[x + 1][y - 1] > tis)
                             || (grey[x - 1][y + 1] > tis)) {
