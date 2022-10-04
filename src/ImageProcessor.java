@@ -69,7 +69,6 @@ public class ImageProcessor {
                         grey += kernel[x][y] * (red + green + blue) / 3.0;
                     }
                 }
-                grey = Math.abs(grey);
                 int rgb = 255;
                 rgb = (rgb << 8) + (int) grey;
                 rgb = (rgb << 8) + (int) grey;
@@ -97,7 +96,6 @@ public class ImageProcessor {
                         grey += kernel[x][y] * (red + green + blue) / 3.0;
                     }
                 }
-                grey = Math.abs(grey);
                 out[i][j] = grey;
             }
         }
@@ -111,20 +109,44 @@ public class ImageProcessor {
         double[][] yProcessed = applySobelKernel(Gy, img);
         BufferedImage out = new BufferedImage(img.getWidth(), img.getHeight(),
                 BufferedImage.TYPE_BYTE_GRAY);
-        for (int x = 0; x < img.getWidth(); x++) {
-            for (int y = 0; y < img.getHeight(); y++) {
-                double greyXScaled = xProcessed[x][y] / 255.0;
-                double greyYScaled = yProcessed[x][y] / 255.0;
-                double grey = Math.sqrt(
-                        greyXScaled * greyXScaled + greyYScaled * greyYScaled)
-                        * 255;
+        double[][] result = nonMaxSuppression(xProcessed, yProcessed);
+        for (int i = 0; i < img.getWidth(); i++) {
+            for (int j = 0; j < img.getHeight(); j++) {
                 int rgb = 255;
-                rgb = (rgb << 8) + (int) grey;
-                rgb = (rgb << 8) + (int) grey;
-                rgb = (rgb << 8) + (int) grey;
-                out.setRGB(x, y, rgb);
+                rgb = (rgb << 8) + (int) result[i][j];
+                rgb = (rgb << 8) + (int) result[i][j];
+                rgb = (rgb << 8) + (int) result[i][j];
+                out.setRGB(i, j, rgb);
             }
         }
         return out;
+    }
+
+    private static double[][] nonMaxSuppression(double[][] xMag,
+            double[][] yMag) {
+        double[][] angle = new double[xMag.length][xMag[0].length];
+        double[][] grey = new double[xMag.length][xMag[0].length];
+        for (int x = 0; x < xMag.length; x++) {
+            for (int y = 0; y < xMag[0].length; y++) {
+                if (xMag[x][y] == 0 && yMag[x][y] == 0) {
+                    continue;
+                }
+                double greyXScaled = xMag[x][y] / 255.0;
+                double greyYScaled = xMag[x][y] / 255.0;
+                grey[x][y] = Math.sqrt(
+                        greyXScaled * greyXScaled + greyYScaled * greyYScaled)
+                        * 255;
+                angle[x][y] = Math.PI / 2;
+                if (greyXScaled != 0) {
+                    angle[x][y] = Math.atan(greyYScaled / greyXScaled);
+                }
+            }
+        }
+        for (int x = 0; x < xMag.length; x++) {
+            for (int y = 0; y < xMag[0].length; y++) {
+
+            }
+        }
+        return grey;
     }
 }
