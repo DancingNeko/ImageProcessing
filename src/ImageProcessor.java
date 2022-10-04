@@ -112,10 +112,11 @@ public class ImageProcessor {
         double[][] result = nonMaxSuppression(xProcessed, yProcessed);
         for (int i = 0; i < img.getWidth(); i++) {
             for (int j = 0; j < img.getHeight(); j++) {
+                int visual = (int) result[i][j];
                 int rgb = 255;
-                rgb = (rgb << 8) + (int) result[i][j];
-                rgb = (rgb << 8) + (int) result[i][j];
-                rgb = (rgb << 8) + (int) result[i][j];
+                rgb = (rgb << 8) + visual;
+                rgb = (rgb << 8) + visual;
+                rgb = (rgb << 8) + visual;
                 out.setRGB(i, j, rgb);
             }
         }
@@ -132,19 +133,48 @@ public class ImageProcessor {
                     continue;
                 }
                 double greyXScaled = xMag[x][y] / 255.0;
-                double greyYScaled = xMag[x][y] / 255.0;
+                double greyYScaled = yMag[x][y] / 255.0;
                 grey[x][y] = Math.sqrt(
                         greyXScaled * greyXScaled + greyYScaled * greyYScaled)
                         * 255;
-                angle[x][y] = Math.PI / 2;
+                angle[x][y] = 90;
                 if (greyXScaled != 0) {
-                    angle[x][y] = Math.atan(greyYScaled / greyXScaled);
+                    angle[x][y] = Math
+                            .toDegrees(Math.atan(greyYScaled / greyXScaled));
                 }
             }
         }
-        for (int x = 0; x < xMag.length; x++) {
-            for (int y = 0; y < xMag[0].length; y++) {
-
+        int width = xMag.length;
+        int height = xMag[0].length;
+        for (int x = 1; x < width - 1; x++) {
+            for (int y = 1; y < height - 1; y++) {
+                if (Math.abs(angle[x][y] + 90) <= 22.5
+                        || Math.abs(angle[x][y] - 90) <= 22.5) {
+                    double tis = grey[x][y];
+                    if ((grey[x][y - 1] > tis) || (grey[x][y + 1] > tis)) {
+                        grey[x][y] = 0;
+                    }
+                }
+                if (Math.abs(angle[x][y] + 45) <= 22.5) {
+                    double tis = grey[x][y];
+                    if ((grey[x - 1][y - 1] > tis)
+                            || (grey[x + 1][y + 1] > tis)) {
+                        grey[x][y] = 0;
+                    }
+                }
+                if (Math.abs(angle[x][y]) <= 22.5) {
+                    double tis = grey[x][y];
+                    if ((grey[x - 1][y] > tis) || (grey[x + 1][y] > tis)) {
+                        grey[x][y] = 0;
+                    }
+                }
+                if (Math.abs(angle[x][y] - 45) <= 22.5) {
+                    double tis = grey[x][y];
+                    if ((grey[x + 1][y - 1] > tis)
+                            || (grey[x - 1][y + 1] > tis)) {
+                        grey[x][y] = 0;
+                    }
+                }
             }
         }
         return grey;
