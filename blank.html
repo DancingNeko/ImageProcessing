@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="https://www.desmos.com/api/v1.7/calculator.js?apiKey=dcb31709b452b1cf9dc26972add0fda6"></script>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        div {
+        height: 100vh;
+        }
+    </style>
+
+</head>
+<body>
+    <div id="calculator" ></div>
+    <script>
+    var elt = document.getElementById('calculator');
+    var calculator = Desmos.GraphingCalculator(elt);
+    calculator.setExpression({ id: 'graph 0', latex: 'y=x' });
+    calculator.setExpression({ id: 'graph 1', latex: 'y = x^3' });</script>
+</body>
+</html>

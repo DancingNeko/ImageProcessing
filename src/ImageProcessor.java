@@ -1,8 +1,11 @@
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 
 import javax.imageio.ImageIO;
+import org.apache.commons.math3.stat.regression.SimpleRegression;
+
 
 public class ImageProcessor {
 
@@ -102,29 +105,29 @@ public class ImageProcessor {
         return out;
     }
 
-    public static BufferedImage sobel(BufferedImage img) {
+    public static double[][] sobel(BufferedImage img, int edge) {
         double[][] Gx = { { 1, 0, -1 }, { 2, 0, -2 }, { 1, 0, -1 } };
         double[][] Gy = { { 1, 2, 1 }, { 0, 0, 0 }, { -1, -2, -1 } };
         double[][] xProcessed = applySobelKernel(Gx, img);
         double[][] yProcessed = applySobelKernel(Gy, img);
         BufferedImage out = new BufferedImage(img.getWidth(), img.getHeight(),
                 BufferedImage.TYPE_BYTE_GRAY);
-        double[][] result = nonMaxSuppression(xProcessed, yProcessed);
-        for (int i = 0; i < img.getWidth(); i++) {
-            for (int j = 0; j < img.getHeight(); j++) {
-                int visual = (int) result[i][j];
-                int rgb = 255;
-                rgb = (rgb << 8) + visual;
-                rgb = (rgb << 8) + visual;
-                rgb = (rgb << 8) + visual;
-                out.setRGB(i, j, rgb);
-            }
-        }
-        return out;
+        double[][] result = nonMaxSuppression(xProcessed, yProcessed, edge);
+        //for (int i = 0; i < img.getWidth(); i++) {
+        //    for (int j = 0; j < img.getHeight(); j++) {
+        //        int visual = result[i][j] > edge ? 255 : 0;
+        //        int rgb = 255;
+        //        rgb = (rgb << 8) + visual;
+        //        rgb = (rgb << 8) + visual;
+        //        rgb = (rgb << 8) + visual;
+        //        out.setRGB(i, j, rgb);
+        //    }
+        //}
+        return result;
     }
 
     private static double[][] nonMaxSuppression(double[][] xMag,
-            double[][] yMag) {
+            double[][] yMag, int edge) {
         double[][] angle = new double[xMag.length][xMag[0].length];
         double[][] grey = new double[xMag.length][xMag[0].length];
         for (int x = 0; x < xMag.length; x++) {
@@ -137,46 +140,83 @@ public class ImageProcessor {
                 grey[x][y] = Math.sqrt(
                         greyXScaled * greyXScaled + greyYScaled * greyYScaled)
                         * 255;
-                angle[x][y] = 90;
-                if (greyXScaled != 0) {
-                    angle[x][y] = Math
-                            .toDegrees(Math.atan(greyYScaled / greyXScaled));
-                }
+                grey[x][y] = grey[x][y] >= grey[x][y]*(edge/10.0) ? 255 : 0;
+                //angle[x][y] = 90;
+                //if (greyXScaled != 0) {
+                //    angle[x][y] = Math
+                //            .toDegrees(Math.atan(greyYScaled / greyXScaled));
+                //}
             }
         }
-        int width = xMag.length;
-        int height = xMag[0].length;
-        for (int x = 1; x < width - 1; x++) {
-            for (int y = 1; y < height - 1; y++) {
-                if (Math.abs(angle[x][y] - 180) <= 22.5
-                        || Math.abs(angle[x][y]) <= 22.5) {
-                    double tis = grey[x][y];
-                    if ((grey[x][y - 1] > tis) || (grey[x][y + 1] > tis)) {
-                        grey[x][y] = 0;
-                    }
-                }
-                if (Math.abs(angle[x][y] - 45) <= 22.5) {
-                    double tis = grey[x][y];
-                    if ((grey[x - 1][y - 1] > tis)
-                            || (grey[x + 1][y + 1] > tis)) {
-                        grey[x][y] = 0;
-                    }
-                }
-                if (Math.abs(angle[x][y] + 90) <= 22.5) {
-                    double tis = grey[x][y];
-                    if ((grey[x - 1][y] > tis) || (grey[x + 1][y] > tis)) {
-                        grey[x][y] = 0;
-                    }
-                }
-                if (Math.abs(angle[x][y] - 135) <= 22.5) {
-                    double tis = grey[x][y];
-                    if ((grey[x + 1][y - 1] > tis)
-                            || (grey[x - 1][y + 1] > tis)) {
-                        grey[x][y] = 0;
-                    }
-                }
-            }
-        }
+        //int width = xMag.length;
+        //int height = xMag[0].length;
+        //for (int x = 1; x < width - 1; x++) {
+        //    for (int y = 1; y < height - 1; y++) {
+        //        if (Math.abs(angle[x][y] - 180) <= 22.5
+        //                || Math.abs(angle[x][y]) <= 22.5) {
+        //            double tis = grey[x][y];
+        //            if ((grey[x][y - 1] >= tis) || (grey[x][y + 1] >= tis)) {
+        //                grey[x][y] = 0;
+        //            }
+        //        }
+        //        if (Math.abs(angle[x][y] - 45) <= 22.5) {
+        //            double tis = grey[x][y];
+        //            if ((grey[x - 1][y - 1] >= tis)
+        //                    || (grey[x + 1][y + 1] >= tis)) {
+        //                grey[x][y] = 0;
+        //            }
+        //        }
+        //        if (Math.abs(angle[x][y] + 90) <= 22.5) {
+        //            double tis = grey[x][y];
+        //            if ((grey[x - 1][y] >= tis) || (grey[x + 1][y] >= tis)) {
+        //                grey[x][y] = 0;
+        //            }
+        //        }
+        //        if (Math.abs(angle[x][y] - 135) <= 22.5) {
+        //            double tis = grey[x][y];
+        //            if ((grey[x + 1][y - 1] >= tis)
+        //                    || (grey[x - 1][y + 1] >= tis)) {
+        //                grey[x][y] = 0;
+        //            }
+        //        }
+        //    }
+        //}
         return grey;
+    }
+
+    public static ArrayList<String> regression(double[][] img, int size){
+        ArrayList<String> out = new ArrayList<String>();
+        for(int i = 0; i < img.length - size; i+=size/2){
+            for(int j = 0; j < img[0].length - size; j+=size/2){
+                int count = 0;
+                for (int x = 0; x < size; x++){
+                    for (int y = 0; y < size; y++){
+                        if (img[i+x][j+y] != 0)
+                            count++;
+                    }
+                }
+                if(count >= 0.9*size*size || count <= 0.2*size*size || count == 0)
+                    continue;
+                double[] xCord = new double[count];
+                double[] yCord = new double[count];
+                count = 0;
+                for (int x = 0; x < size; x++){
+                    for (int y = 0; y < size; y++){
+                        if (img[i+x][j+y] != 0){
+                            xCord[count] = x;
+                            yCord[count] = y;
+                            count++;
+                        }
+                    }
+                }
+                SimpleRegression reg = new SimpleRegression();
+                for(int v = 0; v < xCord.length; v++)
+                    reg.addData(xCord[v],yCord[v]);
+                String output = -1*reg.getSlope() + "(x-" + i + ")+" + -1*(reg.getIntercept() + j);
+                output += "\\\\{" + i + "<=x<=" + (i+size) + "\\\\}";
+                out.add(output);
+            }
+        }
+        return out;
     }
 }

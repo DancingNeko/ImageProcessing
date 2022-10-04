@@ -1,18 +1,21 @@
 import java.awt.Graphics;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.image.BufferedImage;
 
-import javax.swing.BoxLayout;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.JSlider;
+import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 public class Visualizer extends JFrame {
     DrawPanel p;
-
+    int countStroke = 0;
+    public static BufferedImage src;
     public Visualizer(BufferedImage img) {
         super();
+        src = img;
         this.setDefaultCloseOperation(EXIT_ON_CLOSE);
         this.setLayout(new BoxLayout(this.getContentPane(), BoxLayout.Y_AXIS));
         JSlider blur = new JSlider();
@@ -20,14 +23,28 @@ public class Visualizer extends JFrame {
         this.p = new DrawPanel(img);
         this.add(this.p);
         this.setSize(img.getWidth(), img.getHeight() + 50);
-        this.setVisible(true);
+        JButton button  = new JButton("confirm");
+        this.add(button);
+        button.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if(countStroke % 2 == 0)
+                    src = Visualizer.blurImage(src, blur.getValue()/10);
+                if(countStroke % 2 == 1)
+                    src = ImageProcessor.sobel(src, (int)(blur.getValue()*2.55));
+                Visualizer.this.countStroke++;
+            }
+        });
         blur.addChangeListener(new ChangeListener() {
             @Override
             public void stateChanged(ChangeEvent ce) {
-                Visualizer.this.p.setPic(
-                        Visualizer.this.blurImage(img, blur.getValue() / 10.0));
+                if(countStroke % 2 == 0)
+                    p.setPic(Visualizer.blurImage(src, blur.getValue()/10));
+                if(countStroke % 2 == 1)
+                    p.setPic(ImageProcessor.sobel(src, (int)(blur.getValue()*2.55)));
             }
         });
+        this.setVisible(true);
     }
 
     class DrawPanel extends JPanel {
@@ -50,7 +67,13 @@ public class Visualizer extends JFrame {
         }
     }
 
-    public BufferedImage blurImage(BufferedImage img, double level) {
+    public BufferedImage sobelImage(BufferedImage img, int level) {
+        BufferedImage out = null;
+        out = ImageProcessor.sobel(img, level);
+        return out;
+    }
+
+    public static BufferedImage blurImage(BufferedImage img, double level) {
         BufferedImage out = null;
         double[][] kernel = ImageProcessor.createKernel((int) level, level);
         out = ImageProcessor.applyKernel(kernel, img);
